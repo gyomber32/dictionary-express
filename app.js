@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 /* routes */
-const authRoutes = require('./routes/auth');
+// const authRoutes = require('./routes/auth');
 const dictionaryRoutes = require('./routes/dictionary');
 
 const app = express();
@@ -23,8 +23,8 @@ app.use((req, res, next) => {
     next();
 });
 
-/*app.use('/auth', authRoutes);
-app.use('/dictionary', dictionaryRoutes);*/
+//app.use('/auth', authRoutes);
+app.use('/dictionary', dictionaryRoutes);
 
 mongoose
     .connect(DATABASE_URL, { useNewUrlParser: true })
