@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const wordSchema = new Schema({
+    _id: mongoose.Schema.ObjectId,
     word: {
         type: String,
         required: true
@@ -27,6 +28,8 @@ const wordSchema = new Schema({
             }
         }
     ]
-});
+},
+    { timestamps: true }
+);
 
 module.exports = mongoose.model('Word', wordSchema);

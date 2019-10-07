@@ -25,12 +25,22 @@ app.use((req, res, next) => {
 
 //app.use('/auth', authRoutes);
 app.use('/dictionary', dictionaryRoutes);
+app.use((error, req, res, next) => {
+    const status = error.statusCode || 500;
+    const message = error.message;
+    const data = error.data;
+    res.status(status).json({ message: message, data: data });
+});
 
 mongoose
-    .connect(DATABASE_URL, { useNewUrlParser: true })
+    .connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(result => {
         app.listen(3000);
+        console.log('\n');
+        console.log('****************************************');
         console.log('Dictionary express successfully started!');
+        console.log('****************************************');
+        console.log('\n');
     })
     .catch(err => {
         console.log(err);
