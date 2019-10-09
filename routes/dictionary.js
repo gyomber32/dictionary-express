@@ -4,7 +4,7 @@ const dictionaryController = require('../controllers/dictionary');
 
 const router = express.Router();
 
-router.get('/words', dictionaryController.getWords);
+router.get('/word', dictionaryController.getWords);
 
 router.get('/word/:wordId', dictionaryController.getWord);
 

@@ -25,6 +25,7 @@ app.use((req, res, next) => {
 
 //app.use('/auth', authRoutes);
 app.use('/dictionary', dictionaryRoutes);
+
 app.use((error, req, res, next) => {
     const status = error.statusCode || 500;
     const message = error.message;
@@ -33,7 +34,13 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-    .connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    .connect(DATABASE_URL, {
+        reconnectTries: 5,
+        reconnectInterval: 30000,
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false
+    })
     .then(result => {
         app.listen(3000);
         console.log('\n');

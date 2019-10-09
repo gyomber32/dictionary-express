@@ -2,14 +2,46 @@ const Word = require('../models/word');
 const mongoose = require('mongoose');
 
 exports.getWords = (req, res, next) => {
-    // TO DO
+    Word.find().then(words => {
+        if (!words) {
+            const error = new Error('Couldn\'t fetch words!');
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({
+            message: 'Words fetched successfully!',
+            data: words
+        });
+    }).catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
 };
 
 exports.getWord = (req, res, next) => {
-    // TO DO
+    const wordId = req.params.wordId;
+    Word.findById(wordId).then(word => {
+        if (!word) {
+            const error = new Error('Couldn\'t find word!');
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({
+            message: 'Word fetched successfully!',
+            data: word
+        });
+    }).catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
 };
 
 exports.createWord = (req, res, next) => {
+    /* OPTIONAL: if the word contains more then one detail, so the details is an array */
     const vocable = req.body.word;
     const detail = {
         partsOfSpeech: req.body.partsOfSpeech,
@@ -69,23 +101,16 @@ exports.createWord = (req, res, next) => {
 };
 
 exports.updateWord = (req, res, next) => {
-    const wordId = req.params.postId;
-    const vocable = req.body.word;
-    const detail = {
-        partsOfSpeech: req.body.partsOfSpeech,
-        hungarian: req.body.hungarian,
-        example: req.body.example,
-        synonym: req.body.synonym
-    }
+    const wordId = mongoose.mongo.ObjectId(req.params.wordId);
+    const wordUpdate = req.body;
     Word.findById(wordId).then(word => {
         if (!word) {
             const error = new Error('Word couldn\'t be found!');
             error.statusCode = 404;
             throw error;
         }
-        word.word = vocable;
-        //if a word has more than one detail object, every object should be capable of updating
-        word.detail = detail;
+        word.word = wordUpdate.word;
+        word.details = wordUpdate.details;
         return word.save();
     }).then(result => {
         res.status(200).json({
@@ -101,7 +126,7 @@ exports.updateWord = (req, res, next) => {
 };
 
 exports.deleteWord = (req, res, next) => {
-    const wordId = req.params.postId;
+    const wordId = mongoose.mongo.ObjectId(req.params.wordId);
     Word.findById(wordId)
         .then(word => {
             if (!word) {
@@ -109,10 +134,9 @@ exports.deleteWord = (req, res, next) => {
                 error.statusCode = 404;
                 throw error;
             }
-            return Post.findByIdAndRemove(wordId);
+            return Word.findByIdAndRemove(wordId);
         })
         .then(result => {
-            console.log(result);
             res.status(200).json({
                 message: 'Word deleted successfully!',
                 data: result
