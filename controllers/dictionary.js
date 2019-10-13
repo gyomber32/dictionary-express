@@ -2,12 +2,15 @@ const Word = require('../models/word');
 const mongoose = require('mongoose');
 
 exports.getWords = (req, res, next) => {
-    Word.find().then(words => {
+    Word.find().lean().then(words => {
         if (!words) {
             const error = new Error('Couldn\'t fetch words!');
             error.statusCode = 404;
             throw error;
         }
+        words.forEach((word, i) => {
+            words[i].createdAt = dateFormat(word.createdAt);
+        });
         res.status(200).json({
             message: 'Words fetched successfully!',
             data: words
@@ -28,9 +31,11 @@ exports.getWord = (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
+        let formattedWord = word.toObject();
+        formattedWord.createdAt = dateFormat(word.createdAt);
         res.status(200).json({
             message: 'Word fetched successfully!',
-            data: word
+            data: formattedWord
         });
     }).catch(err => {
         if (!err.statusCode) {
@@ -41,26 +46,21 @@ exports.getWord = (req, res, next) => {
 };
 
 exports.createWord = (req, res, next) => {
-    /* OPTIONAL: if the word contains more then one detail, so the details is an array */
-    const vocable = req.body.word;
-    const detail = {
-        partsOfSpeech: req.body.partsOfSpeech,
-        hungarian: req.body.hungarian,
-        example: req.body.example,
-        synonym: req.body.synonym
-    }
-    /* check existing word */
-    Word.findOne({ word: vocable }).then(existingWord => {
+    const word = req.body.word;
+    const details = req.body.details;
+    Word.findOne({ english: word }).then(existingWord => {
         if (!existingWord) {
-            const word = new Word({
+            const newWord = new Word({
                 _id: mongoose.Types.ObjectId(),
-                word: vocable,
-                details: detail
+                english: word,
+                details: details
             });
-            word.save().then(result => {
+            newWord.save().then(result => {
+                let formattedResult = result.toObject();
+                formattedResult.createdAt = dateFormat(result.createdAt);
                 res.status(201).json({
                     message: 'Word created successfully!',
-                    data: result
+                    data: formattedResult
                 });
             }).catch(err => {
                 if (!err.statusCode) {
@@ -69,16 +69,18 @@ exports.createWord = (req, res, next) => {
                 next(err);
             });
         } else {
-            if (existingWord.word === vocable) {
+            if (existingWord.word === word) {
                 const found = existingWord.details.find(element => {
                     return element.partsOfSpeech === detail.partsOfSpeech;
                 });
                 if (!found) {
                     existingWord.details.push(detail);
                     existingWord.save().then(result => {
+                        let formattedResult = result.toObject();
+                        formattedResult.createdAt = dateFormat(result.createdAt);
                         res.status(200).json({
                             message: 'Word details updated successfully!',
-                            data: result
+                            data: formattedResult
                         });
                     }).catch(err => {
                         if (!err.statusCode) {
@@ -109,13 +111,17 @@ exports.updateWord = (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
-        word.word = wordUpdate.word;
+        console.log(wordUpdate);
+        word.english = wordUpdate.word;
         word.details = wordUpdate.details;
+        console.log(word);
         return word.save();
     }).then(result => {
+        let formattedResult = result.toObject();
+        formattedResult.createdAt = dateFormat(result.createdAt);
         res.status(200).json({
             message: 'Word updated successfully!',
-            data: result
+            data: formattedResult
         });
     }).catch(err => {
         if (!err.statusCode) {
@@ -149,3 +155,7 @@ exports.deleteWord = (req, res, next) => {
             next(err);
         });
 };
+
+function dateFormat(date) {
+    return new Date(date).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+}

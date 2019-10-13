@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const wordSchema = new Schema({
     _id: mongoose.Schema.ObjectId,
-    word: {
+    english: {
         type: String,
         required: true
     },

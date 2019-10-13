@@ -1,12 +1,19 @@
-const DATABASE_URL = 'mongodb://localhost:27017/dictionary';
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const path = require("path");
+const dotenv = require("dotenv")
+dotenv.config({ path: path.resolve(__dirname, `../dictionary-express/config/${process.env.ENVIRONMENT}.env`) });
+
+const port = process.env.PORT;
+const database_host = process.env.DATABASE_HOST;
+const database_port = process.env.DATABASE_PORT;
+const database_name = process.env.DATABASE_NAME;
 
 /* routes */
 // const authRoutes = require('./routes/auth');
 const dictionaryRoutes = require('./routes/dictionary');
+const translateRoutes = require('./routes/translate');
 
 const app = express();
 
@@ -25,6 +32,7 @@ app.use((req, res, next) => {
 
 //app.use('/auth', authRoutes);
 app.use('/dictionary', dictionaryRoutes);
+app.use('/translate', translateRoutes);
 
 app.use((error, req, res, next) => {
     const status = error.statusCode || 500;
@@ -34,7 +42,7 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-    .connect(DATABASE_URL, {
+    .connect(`${database_host}${database_port}${database_name}`, {
         reconnectTries: 5,
         reconnectInterval: 30000,
         useNewUrlParser: true,
@@ -42,7 +50,7 @@ mongoose
         useFindAndModify: false
     })
     .then(result => {
-        app.listen(3000);
+        app.listen(port);
         console.log('\n');
         console.log('****************************************');
         console.log('Dictionary express successfully started!');
