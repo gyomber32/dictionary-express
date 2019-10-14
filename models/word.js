@@ -11,7 +11,7 @@ const wordSchema = new Schema({
         {
             partsOfSpeech: {
                 type: String,
-                enum: ['noun', 'pronoun', 'adjective', 'verb', 'adverb', 'preposition', 'conjunction', 'interjenction'],
+                enum: ['noun', 'pronoun', 'adjective', 'verb', 'adverb', 'preposition', 'conjunction', 'interjection'],
                 required: true
             },
             hungarian: {
