@@ -111,10 +111,8 @@ exports.updateWord = (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
-        console.log(wordUpdate);
         word.english = wordUpdate.word;
         word.details = wordUpdate.details;
-        console.log(word);
         return word.save();
     }).then(result => {
         let formattedResult = result.toObject();
